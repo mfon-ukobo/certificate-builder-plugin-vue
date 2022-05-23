@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" height="100">
+    <!-- <img alt="Vue logo" src="./assets/logo.png" height="100"> -->
     <CertBuilder />
   </div>
 </template>
@@ -23,6 +23,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 </style>

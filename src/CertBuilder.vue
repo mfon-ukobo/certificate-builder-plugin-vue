@@ -1,25 +1,49 @@
 <template>
   <div class="cb_container">
-    <LeftSidebar :placeholdersConfig="placeholders" />
+    <LeftSidebar
+      :placeholdersConfig="placeholders"
+      @certificateImageUploaded="handleCertificateImageUpload"
+    />
 
-    <div class="cb_workspace_area">
-      <div class="cb_workspace" @drop="handleWidgetDrop($event)" @dragover.prevent @dragenter.prevent></div>
+    <div class="cb_workspace_area_container">
+      <div
+        class="cb_workspace_area"
+        @click="handleWorkspaceClick"
+        @wheel="handleMouseWheel"
+        ref="workspaceArea"
+      >
+        <div
+          class="cb_workspace"
+          @drop="handleWidgetDrop($event)"
+          @dragover.prevent
+          @dragenter.prevent
+          ref="workspace"
+        ></div>
+      </div>
     </div>
 
-    <RightSidebar :selectedItem="selectedItem" :propertySidebarConfig="propertySidebarConfig" />
+    <RightSidebar
+      :selectedItem="selectedItem"
+      :propertySidebarConfig="propertySidebarConfig"
+      :currentTab="rightSidebarCurrentTab"
+      :paperSizes="paperSizes"
+      @itemPropertyChanged="handlePropertyChanged"
+      @paperSizeChanged="handlePaperSizeChanged"
+      @backgroundImageChanged="handleBackgroundImageChanged"
+    />
   </div>
 </template>
 
 <script>
-import LeftSidebar from './components/LeftSidebar.vue'
-import RightSidebar from './components/RightSidebar.vue'
+import LeftSidebar from "./components/LeftSidebar.vue";
+import RightSidebar from "./components/RightSidebar.vue";
 
-import PROPERTY_ITEMS_TYPES from './constants/PropertySidebarItemTypes.js'
+import PROPERTY_ITEMS_TYPES from "./constants/PropertySidebarItemTypes.js";
 
 export default {
   components: {
     LeftSidebar,
-    RightSidebar
+    RightSidebar,
   },
   props: {
     placeholdersConfig: Array,
@@ -27,44 +51,56 @@ export default {
       type: Object,
       default() {
         return {
-          container: 'cb_container',
-          workspaceClass: 'cb_workspace',
-          workspaceContainerClass: 'cb_workspace_container',
-          workspaceItemClass: 'cb_workspace_item',
-          activeWorkspaceItemClass: 'cb_is_current_workspace_item',
-          widgetsContainerClass: 'cb_widgets_container',
-          widgetContainerClass: 'cb_widget_container',
-          widgetClass: 'cb_widget',
-          placeholdersContainerClass: 'cb_placeholders_container',
+          container: "cb_container",
+          workspaceClass: "cb_workspace",
+          workspaceContainerClass: "cb_workspace_container",
+          workspaceItemClass: "cb_workspace_item",
+          activeWorkspaceItemClass: "active",
+          widgetsContainerClass: "cb_widgets_container",
+          widgetContainerClass: "cb_widget_container",
+          widgetClass: "cb_widget",
+          placeholdersContainerClass: "cb_placeholders_container",
           placeholders: [],
           imageUploadHandler: function (e) {
             console.log("Call API");
             let file = e.target.files[0];
             var bgUrl = URL.createObjectURL(file);
             this.workspace.style.backgroundImage = `url(${bgUrl})`;
-          }
-        }
-      }
-    }
+          },
+        };
+      },
+    },
+    paperSizesConfig: {
+      type: Array,
+      default() {
+        return [
+          {
+            name: "A4",
+            width: 1056,
+            height: 816,
+          },
+        ];
+      },
+    },
   },
   data() {
     return {
       placeholders: [
         {
-          id: 'w-1',
-          name: 'First Name',
-          placeholder: "first_name"
+          id: "w-1",
+          name: "First Name",
+          placeholder: "first_name",
         },
         {
-          id: 'w-2',
-          name: 'Last Name',
-          placeholder: "last_name"
+          id: "w-2",
+          name: "Last Name",
+          placeholder: "last_name",
         },
         {
-          id: 'w-3',
-          name: 'Score',
-          placeholder: "score"
-        }
+          id: "w-3",
+          name: "Score",
+          placeholder: "score",
+        },
       ],
       propertySidebarConfig: {
         span: [
@@ -75,21 +111,21 @@ export default {
             options: [
               {
                 name: "12",
-                value: "12px"
+                value: "12px",
               },
               {
                 name: "14",
-                value: "14px"
+                value: "14px",
               },
               {
                 name: "16",
-                value: "16px"
+                value: "16px",
               },
               {
                 name: "18",
-                value: "18px"
-              }
-            ]
+                value: "18px",
+              },
+            ],
           },
           {
             name: "Font Family",
@@ -98,21 +134,21 @@ export default {
             options: [
               {
                 name: "Arial",
-                value: "arial"
+                value: "arial",
               },
               {
                 name: "Consolas",
-                value: "consolas"
+                value: "consolas",
               },
               {
                 name: "Sans Serif",
-                value: "sans-serif"
+                value: "sans-serif",
               },
               {
                 name: "Times New Roman",
-                value: "times new roman"
-              }
-            ]
+                value: "times new roman",
+              },
+            ],
           },
           {
             name: "Font Styling",
@@ -121,40 +157,46 @@ export default {
               {
                 name: "B",
                 property: "font-weight",
-                value: "bold"
+                value: "bold",
               },
               {
                 name: "U",
                 property: "text-decoration",
-                value: "underline"
+                value: "underline",
               },
               {
                 name: "I",
                 property: "font-style",
-                value: "italic"
-              }
-            ]
+                value: "italic",
+              },
+            ],
           },
           {
             name: "Color",
             property: "color",
-            type: PROPERTY_ITEMS_TYPES.color
-          }
-        ]
+            type: PROPERTY_ITEMS_TYPES.color,
+          },
+        ],
       },
+      paperSizes: Array,
       dragged: null,
-      workspace: null,
-      selectedItem: null
-    }
+      selectedItem: null,
+      workspace: HTMLElement,
+      rightSidebarCurrentTab: "workspace",
+      workspaceScale: 1,
+      scaleFactor: 0.1
+    };
   },
   methods: {
     handleWidgetDrop(e) {
       let dropElement;
 
       if (this.dragged == null) {
-        let id = e.dataTransfer.getData('widget');
+        console.log("error");
+        let id = e.dataTransfer.getData("widget");
 
-        let placeholder = this.placeholders.find(x => x.id == id);
+        let placeholder = this.placeholders.find((x) => x.id == id);
+        console.log({ placeholder, id });
 
         dropElement = document.createElement("span");
         dropElement.draggable = true;
@@ -164,160 +206,242 @@ export default {
         dropElement.style.position = "absolute";
         dropElement.textContent = `{{${placeholder.placeholder}}}`;
 
-        dropElement.addEventListener('dragstart', this.handleWorkspaceItemDragStart);
-        dropElement.addEventListener('click', this.handleWorkspaceItemClick);
-        document.addEventListener('keydown', this.handleArrowKeyDown);
-      }
-      else {
+        e.target.append(dropElement);
+
+        dropElement.addEventListener(
+          "dragstart",
+          this.handleWorkspaceItemDragStart
+        );
+        dropElement.addEventListener("click", this.handleWorkspaceItemClick);
+        document.addEventListener("keydown", this.handleArrowKeyDown);
+      } else {
         dropElement = this.dragged;
         this.dragged = null;
       }
 
-      e.target.append(dropElement);
+      this.selectItem(dropElement);
 
-      let elWidth = dropElement.offsetWidth;
-      let elHeight = dropElement.offsetHeight;
+      if (this.selectedItem != e.target) {
+        let elWidth = dropElement.offsetWidth;
+        let elHeight = dropElement.offsetHeight;
 
-      dropElement.style.top = `${e.layerY - (elHeight / 2)}px`;
-      dropElement.style.left = `${e.layerX - (elWidth / 2)}px`;
+        dropElement.style.top = `${e.layerY - elHeight / 2}px`;
+        dropElement.style.left = `${e.layerX - elWidth / 2}px`;
+      }
     },
     handleWorkspaceItemDragStart(e) {
       this.dragged = e.target;
     },
     handleWorkspaceItemClick(e) {
+      e.stopPropagation();
+      this.rightSidebarCurrentTab = "item";
       this.selectItem(e.target);
-
-      var workspaceItems = document.getElementsByClassName(this.options.workspaceItemClass);
-
-      for (let item of workspaceItems) {
-        item.classList.remove(this.options.activeWorkspaceItemClass);
-      }
-
-      e.target.classList.add(this.options.activeWorkspaceItemClass);
+    },
+    handleWorkspaceClick(e) {
+      e.stopPropagation();
+      this.rightSidebarCurrentTab = "workspace";
+      this.selectItem(e.target);
     },
     selectItem(element) {
       this.selectedItem = element;
-    },
-    buildPropertySidebar(element) {
-      this.rightSidebar.innerHTML = null;
-      for (let item of this.options.propertySidebar) {
-        var container = document.createElement("div");
-        container.background = "white";
-        container.classList.add("card", "card-body", "mb-3", "m-3");
 
-        var label = document.createElement("label");
-        label.textContent = item.name;
-        container.append(label);
-
-        let input;
-
-        switch (item.type) {
-          case PROPERTY_ITEMS_TYPES.color:
-            input = document.createElement("input");
-            input.type = "color";
-            input.classList.add("form-control");
-
-            input.addEventListener('change', (e) => {
-              this.currentElement.style[item.property] = e.target.value;
-            });
-            break;
-          case PROPERTY_ITEMS_TYPES.dropdown:
-            input = document.createElement("select");
-            input.classList.add("form-control");
-            if (item.options) {
-              for (let option of item.options) {
-                let optionElement = document.createElement("option");
-                optionElement.textContent = option.name;
-                optionElement.value = option.value;
-                if (element.style[item.property] == option.value) {
-                  optionElement.selected = true;
-                }
-
-                input.appendChild(optionElement);
-              }
-            }
-            input.addEventListener('change', (e) => {
-              this.currentElement.style[item.property] = e.target.value;
-            });
-            break;
-          case PROPERTY_ITEMS_TYPES.checkbox:
-            input = document.createElement("div");
-            input.classList.add("btn-group", "btn-group-toggle");
-
-            for (let property of item.properties) {
-              let groupItem = document.createElement("label");
-              groupItem.classList.add("btn", "btn-primary");
-              groupItem.dataset.value = property.value;
-              groupItem.dataset.property = property.property;
-
-              let groupItemInput = document.createElement("input");
-              groupItemInput.value = property.value;
-              groupItemInput.type = "checkbox";
-              groupItemInput.name = item.name;
-
-              groupItem.title = property.name;
-
-              var textNode = document.createTextNode(property.name);
-              groupItem.append(textNode);
-
-              groupItem.addEventListener("click", (e) => {
-                let propertyName = e.target.dataset.property;
-                let propertyValue = e.target.dataset.value;
-
-                if (this._currentElement.style[propertyName] != propertyValue) {
-                  this.currentElement.style[propertyName] = propertyValue;
-                }
-                else {
-                  this.currentElement.style[propertyName] = "";
-                }
-              });
-
-              input.appendChild(groupItem);
-            }
-            break;
-          default:
-            break;
-        }
-
-        container.append(input);
-
-        this.rightSidebar.append(container);
+      if (element.classList.contains(this.options.workspaceClass)) {
+        this.rightSidebarCurrentTab = "workspace";
+        return;
       }
-    }
-  }
-}
+
+      this.rightSidebarCurrentTab = "item";
+    },
+    handlePropertyChanged(data) {
+      let propertyData = data.propertyData;
+      console.log({ SelectedItem: data.selectedItem });
+      console.log({ ProprtyData: data.propertyData });
+      console.log({ Value: data.value });
+
+      this.selectedItem.style[propertyData.property] = data.value;
+    },
+    handleArrowKeyDown(e) {
+      const VALID_KEY_CODES = [37, 38, 39, 40];
+      const MOVEMENT_UNIT = 2;
+
+      if (VALID_KEY_CODES.includes(e.keyCode)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      var currentElement = this.selectedItem;
+
+      if (currentElement == null || currentElement == undefined) {
+        return;
+      }
+
+      switch (e.keyCode) {
+        case 37:
+          currentElement.style.left =
+            convertPxToNumber(currentElement.style.left) - MOVEMENT_UNIT + "px";
+          break;
+        case 38:
+          currentElement.style.top =
+            convertPxToNumber(currentElement.style.top) - MOVEMENT_UNIT + "px";
+          break;
+        case 39:
+          currentElement.style.left =
+            convertPxToNumber(currentElement.style.left) + MOVEMENT_UNIT + "px";
+          break;
+        case 40:
+          currentElement.style.top =
+            convertPxToNumber(currentElement.style.top) + MOVEMENT_UNIT + "px";
+          break;
+
+        default:
+          break;
+      }
+
+      // Convert px to number
+      function convertPxToNumber(px) {
+        return Number.parseInt(px.replace("px", ""));
+      }
+    },
+    handleCertificateImageUpload(data) {
+      let workspace = this.$refs.workspace;
+      workspace.style.backgroundImage = `url(${data})`;
+    },
+    handlePaperSizeChanged(paperConfig) {
+      let workspace = this.$refs.workspace;
+      workspace.style.height = paperConfig.height + "px";
+      workspace.style.width = paperConfig.width + "px";
+      this.workspaceScale = 1 - this.scaleFactor;
+      console.log()
+    },
+    handleBackgroundImageChanged(data) {
+      this.selectedItem.style.backgroundImage = `url(${data})`;
+    },
+    handleMouseWheel(e) {
+      e.preventDefault();
+      let scale = this.workspaceScale;
+      scale += e.deltaY * -0.001;
+      scale = Math.min(Math.max(0.125, scale), 4);
+
+      let workspaceArea = this.$refs.workspaceArea;
+      workspaceArea.style.transformOrigin = `50% 50%`;
+
+      this.workspaceScale = scale;
+    },
+    addEventListeners() {
+      let $this = this;
+
+      document.addEventListener("click", function (e) {
+        if (e.target.classList.contains($this.options.workspaceItemClass)) {
+          $this.handleWorkspaceItemClick(e);
+        } else if (e.target.classList.contains($this.options.workspaceClass)) {
+          $this.handleWorkspaceClick(e);
+        }
+      });
+
+      document.addEventListener("dragstart", function (e) {
+        if (e.target.classList.contains($this.options.workspaceItemClass)) {
+          $this.handleWorkspaceItemDragStart(e);
+        }
+      });
+
+      document.addEventListener("drag", function(e) {
+        if (e.target.classList.contains($this.options.workspaceItemClass)) {
+          console.log(e);
+        }
+      })
+
+      document.addEventListener("drop", function (e) {
+        e.preventDefault();
+        if (e.target.classList.contains($this.options.workspaceClass)) {
+          //$this.handleWidgetDrop(e);
+        }
+      });
+    },
+  },
+  watch: {
+    selectedItem(item) {
+      // remove active class from all workspace items
+      var activeItems = document.getElementsByClassName(
+        this.options.activeWorkspaceItemClass
+      );
+
+      for (let activeItem of activeItems) {
+        activeItem.classList.remove(this.options.activeWorkspaceItemClass);
+      }
+
+      if (item.classList.contains("cb_workspace_item")) {
+        item.classList.add(this.options.activeWorkspaceItemClass);
+        return;
+      }
+
+      item.classList.add(this.options.activeWorkspaceItemClass);
+    },
+    workspaceScale(value) {
+      let workspaceArea = this.$refs.workspaceArea;
+      workspaceArea.style.transform = `scale(${value})`;
+    },
+  },
+  created() {
+    this.paperSizes = this.paperSizesConfig;
+
+    this.addEventListeners();
+  },
+  mounted() {
+    this.selectedItem = this.$refs.workspace;
+  },
+};
 </script>
 
-<style scoped>
+<style>
 .cb_container {
   display: flex;
   align-items: stretch;
+  max-height: 100%;
+  overflow: auto;
+}
+
+.cb_workspace_area_container {
+  height: 500px;
+  width: 90%;
+  overflow: auto;
+  background-color: lightgray;
+  border-radius: 24px;
 }
 
 .cb_workspace_area {
   width: 100%;
-  flex-basis: 1;
-  min-height: 300px;
-  background-color: lightgray;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  padding: 30px;
+  transform-origin: top left;
 }
 
 .cb_workspace {
-  min-width: 50%;
-  min-height: 50%;
+  position: relative;
+  width: 400px;
+  height: 200px;
   background-color: white;
+  background-size: 100% 100%;
   box-shadow: 0px 0px 5px -3px;
+}
+
+.cb_workspace.active {
+  outline: 2px solid black;
 }
 
 .cb_workspace_item {
   height: auto;
-  line-height: 1.5;
+  line-height: 1;
+  padding: 4px !important;
+  border-radius: 8px;
+  cursor: grab;
 }
 
-.cb_workspace_item.cb_is_current_workspace_item {
-  background-color: lightgray!important;
-  box-shadow: 0px 0px 5px -1px;
+.cb_workspace_item.active {
+  padding: 2px;
+  outline: 1px solid black;
 }
 </style>
