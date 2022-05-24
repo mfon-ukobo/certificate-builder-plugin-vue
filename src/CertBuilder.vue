@@ -1,36 +1,42 @@
 <template>
   <div class="cb_container">
-    <LeftSidebar
-      :placeholdersConfig="placeholders"
-      @certificateImageUploaded="handleCertificateImageUpload"
-    />
-
-    <div class="cb_workspace_area_container">
-      <div
-        class="cb_workspace_area"
-        @click="handleWorkspaceClick"
-        @wheel="handleMouseWheel"
-        ref="workspaceArea"
-      >
-        <div
-          class="cb_workspace"
-          @drop="handleWidgetDrop($event)"
-          @dragover.prevent
-          @dragenter.prevent
-          ref="workspace"
-        ></div>
+    <div class="row">
+      <div class="col-lg-3 col-md-3 col-sm-12">
+        <LeftSidebar
+          :placeholdersConfig="placeholders"
+          @certificateImageUploaded="handleCertificateImageUpload"
+        />
+      </div>
+      <div class="col-lg-6 col-md-6 col-sm-12">
+        <div class="cb_workspace_area_container">
+          <div
+            class="cb_workspace_area"
+            @click="handleWorkspaceClick"
+            @wheel="handleMouseWheel"
+            ref="workspaceArea"
+          >
+            <div
+              class="cb_workspace"
+              @drop="handleWidgetDrop($event)"
+              @dragover.prevent
+              @dragenter.prevent
+              ref="workspace"
+            ></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-3 col-sm-12">
+        <RightSidebar
+          :selectedItem="selectedItem"
+          :propertySidebarConfig="propertySidebarConfig"
+          :currentTab="rightSidebarCurrentTab"
+          :paperSizes="paperSizes"
+          @itemPropertyChanged="handlePropertyChanged"
+          @paperSizeChanged="handlePaperSizeChanged"
+          @backgroundImageChanged="handleBackgroundImageChanged"
+        />
       </div>
     </div>
-
-    <RightSidebar
-      :selectedItem="selectedItem"
-      :propertySidebarConfig="propertySidebarConfig"
-      :currentTab="rightSidebarCurrentTab"
-      :paperSizes="paperSizes"
-      @itemPropertyChanged="handlePropertyChanged"
-      @paperSizeChanged="handlePaperSizeChanged"
-      @backgroundImageChanged="handleBackgroundImageChanged"
-    />
   </div>
 </template>
 
@@ -184,7 +190,7 @@ export default {
       workspace: HTMLElement,
       rightSidebarCurrentTab: "workspace",
       workspaceScale: 1,
-      scaleFactor: 0.1
+      scaleFactor: 0.1,
     };
   },
   methods: {
@@ -311,7 +317,7 @@ export default {
       workspace.style.height = paperConfig.height + "px";
       workspace.style.width = paperConfig.width + "px";
       this.workspaceScale = 1 - this.scaleFactor;
-      console.log()
+      console.log();
     },
     handleBackgroundImageChanged(data) {
       this.selectedItem.style.backgroundImage = `url(${data})`;
@@ -344,11 +350,11 @@ export default {
         }
       });
 
-      document.addEventListener("drag", function(e) {
+      document.addEventListener("drag", function (e) {
         if (e.target.classList.contains($this.options.workspaceItemClass)) {
           console.log(e);
         }
-      })
+      });
 
       document.addEventListener("drop", function (e) {
         e.preventDefault();
@@ -394,15 +400,16 @@ export default {
 
 <style>
 .cb_container {
-  display: flex;
+  /* display: block; */
   align-items: stretch;
   max-height: 100%;
+  width: 100%;
   overflow: auto;
 }
 
 .cb_workspace_area_container {
   height: 500px;
-  width: 90%;
+  width: 100%;
   overflow: auto;
   background-color: lightgray;
   border-radius: 24px;

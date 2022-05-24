@@ -6,14 +6,14 @@
 </template>
 
 <script>
-import CertBuilder from './CertBuilder.vue'
+import CertBuilder from "./CertBuilder.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    CertBuilder
-  }
-}
+    CertBuilder,
+  },
+};
 </script>
 
 <style>
